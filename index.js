@@ -56,6 +56,9 @@ if (process.env.TOKEN || process.env.SLACK_TOKEN) {
     process.exit(1);
 }
 
+var GameService = require('./gameService.js');
+var gameService = new GameService();
+
 
 /**
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not
@@ -79,30 +82,23 @@ controller.on('rtm_close', function (bot) {
 /**
  * Core bot logic goes here!
  */
-// BEGIN EDITING HERE!
-
 controller.on('bot_channel_join', function (bot, message) {
-    bot.reply(message, "I'm here!")
+    bot.reply(message, "I'm here let's play hangman!")
 });
 
 controller.hears('hello', 'direct_message', function (bot, message) {
     bot.reply(message, 'Hello!');
 });
 
+controller.hears('start', 'direct_message', function (bot, message) {
+    var res = gameService.startGame();
+    bot.reply(message, res);
+});
 
 /**
- * AN example of what could be:
- * Any un-handled direct mention gets a reaction and a pat response!
+ * Any un-handled direct mention gets a reaction
  */
-//controller.on('direct_message,mention,direct_mention', function (bot, message) {
-//    bot.api.reactions.add({
-//        timestamp: message.ts,
-//        channel: message.channel,
-//        name: 'robot_face',
-//    }, function (err) {
-//        if (err) {
-//            console.log(err)
-//        }
-//        bot.reply(message, 'I heard you loud and clear boss.');
-//    });
-//});
+controller.on('direct_message', function (bot, message) {
+    var res = gameService.handleAnswer(message.text);
+    bot.reply(message, res);
+});
