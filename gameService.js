@@ -1,4 +1,4 @@
-module.exports = function(drawingService, wordService) {
+module.exports = function(drawingService, wordService, dataService) {
     var drawingService = drawingService;
     var wordToFind;
     var wordToShow;
@@ -10,25 +10,24 @@ module.exports = function(drawingService, wordService) {
         return wordService.getRandomWord();
     }
 
-    var updateWordToShow = function() {
-        wordToShow = ""
+    var getWordToShow = function(wordToFind, playedLetters) {
+        var wordToShow = ""
         for (var i = 0; i < wordToFind.length; i++) {
             if (playedLetters.includes(wordToFind[i].toUpperCase())) {
                 wordToShow += wordToFind[i] + " ";
             } else {
                 wordToShow += "* ";
-                wrongLetters = true;
             }
         }
+        return wordToShow;
     }
 
-    this.startGame = function() {
+    this.startGame = function(user) {
         isPlaying = true;
-        wordToFind = getRandomWord();
-        playedLetters = [];
-        failedAttemps = 0;
+        var wordToFind = getRandomWord();
+        var wordToShow = getWordToShow(wordToFind, []);
 
-        updateWordToShow();
+        dataService.initializeUserGame(user, wordToFind, wordToShow);
 
         var res = "Let's begin to play!\n";
         res += wordToShow;
@@ -37,49 +36,51 @@ module.exports = function(drawingService, wordService) {
     }
 
     this.handleAnswer = function(message) {
+        var data = dataService.getUserGame(message.user);
+
         /* Not playing yet */
-        if (! isPlaying) {
+        if (!data || !data.isPlaying) {
             return "You are not playing yet, use `start` to begin."
         }
 
-        var letter = message.toUpperCase().trim()[0];
+        var letter = message.text.toUpperCase().trim()[0];
         var res = "";
 
         /* Letter already played */
-        if (playedLetters.includes(letter)) {
+        if (data.playedLetters.includes(letter)) {
             res += "You already played this letter: " + letter + "\n";
-            res += wordToShow;
+            res += data.wordToShow;
             return res;
         }
 
         /* Update the word and the game with the new letter */
-        playedLetters.push(letter);
-        if (wordToFind.includes(letter)) {
-            updateWordToShow();
-            if (wordToShow.includes("*")) {
-                res += wordToShow;
+        data.playedLetters.push(letter);
+        if (data.wordToFind.includes(letter)) {
+            data.wordToShow = getWordToShow(data.wordToFind, data.playedLetters);
+            if (data.wordToShow.includes("*")) {
+                res += data.wordToShow;
             } else {
                 res += "YOU WIN\n";
-                res += wordToFind;
+                res += data.wordToFind;
                 res += "Type `start` to play again"
-                isPlaying = false;
+                data.isPlaying = false;
             }
         } else {
-            failedAttemps += 1;
+            data.failedAttemps += 1;
             res += "WRONG\n";
-            res += "errors: " + failedAttemps + "\n";
-            var drawing = drawingService.getDrawing(failedAttemps);
+            res += "errors: " + data.failedAttemps + "\n";
+            var drawing = drawingService.getDrawing(data.failedAttemps);
             res += "\n```";
             res += drawing;
             res += "```\n\n";
 
-            res += wordToShow;
+            res += data.wordToShow;
         }
 
-        if (failedAttemps == 7) {
-            isPlaying = false;
+        if (data.failedAttemps == 7) {
+            data.isPlaying = false;
             res += "\nYOU LOSE\n";
-            res += wordToFind;
+            res += data.wordToFind;
             res += "\n";
             res += "Type `start` to play again"
         }

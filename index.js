@@ -61,8 +61,11 @@ var drawingService = new DrawingService();
 var WordService = require('./wordService.js');
 var wordService = new WordService();
 
+var DataService = require('./dataService.js');
+var dataService = new DataService(controller);
+
 var GameService = require('./gameService.js');
-var gameService = new GameService(drawingService, wordService);
+var gameService = new GameService(drawingService, wordService, dataService);
 
 /**
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not
@@ -95,7 +98,7 @@ controller.hears('hello', 'direct_message', function (bot, message) {
 });
 
 controller.hears('start', 'direct_message', function (bot, message) {
-    var res = gameService.startGame();
+    var res = gameService.startGame(message.user);
     bot.reply(message, res);
 });
 
@@ -103,6 +106,6 @@ controller.hears('start', 'direct_message', function (bot, message) {
  * Any un-handled direct mention gets a reaction
  */
 controller.on('direct_message', function (bot, message) {
-    var res = gameService.handleAnswer(message.text);
+    var res = gameService.handleAnswer(message);
     bot.reply(message, res);
 });
