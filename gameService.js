@@ -1,5 +1,7 @@
-module.exports = function() {
+var DrawingService = require('./drawingService');
+var drawingService = new DrawingService();
 
+module.exports = function() {
     var wordList = [ 'arbre', 'bateau', 'couteau' ];
     var wordToFind;
     var wordToShow;
@@ -13,9 +15,6 @@ module.exports = function() {
     }
 
     var updateWordToShow = function() {
-        console.log("updateWord");
-        console.log("playedLetters: ");
-        console.log(playedLetters);
         wordToShow = ""
         for (var i = 0; i < wordToFind.length; i++) {
             if (playedLetters.includes(wordToFind[i].toUpperCase())) {
@@ -25,17 +24,15 @@ module.exports = function() {
                 wrongLetters = true;
             }
         }
-
-        console.log("word to show: " + wordToShow);
     }
 
     this.startGame = function() {
         isPlaying = true;
         wordToFind = getRandomWord();
-        updateWordToShow();
+        playedLetters = [];
+        failedAttemps = 0;
 
-        console.log("Word to find: " + wordToFind);
-        console.log("Word to show: " + wordToShow);
+        updateWordToShow();
 
         var res = "Let's begin to play!\n";
         res += wordToShow;
@@ -74,7 +71,18 @@ module.exports = function() {
             failedAttemps += 1;
             res += "WRONG\n";
             res += "errors: " + failedAttemps + "\n";
+            var drawing = drawingService.getDrawing(failedAttemps);
+            res += "\n```";
+            res += drawing;
+            res += "```\n\n";
+
             res += wordToShow;
+        }
+
+        if (failedAttemps == 7) {
+            isPlaying = false;
+            res += "\nYOU LOSE\n";
+            res += "Type `start` to play again"
         }
 
         return res;
