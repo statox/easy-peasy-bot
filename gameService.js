@@ -23,19 +23,25 @@ module.exports = function(drawingService, wordService, dataService) {
     }
 
     this.startGame = function(user) {
-        isPlaying = true;
-        var wordToFind = getRandomWord();
-        var wordToShow = getWordToShow(wordToFind, []);
+        var res = "";
 
-        dataService.initializeUserGame(user, wordToFind, wordToShow);
+        var userData = dataService.getUserGame(user);
+        if (!userData || !userData.isPlaying) {
+            var wordToFind = getRandomWord();
+            var wordToShow = getWordToShow(wordToFind, []);
+            dataService.initializeUserGame(user, wordToFind, wordToShow);
 
-        var res = "Let's begin to play!\n";
-        res += wordToShow;
+            res += "Let's begin to play!\n";
+            res += wordToShow;
+        } else {
+            res += "You are already playing!\n";
+            res += userData.wordToShow;
+        }
 
         return res;
     }
 
-    this.handleAnswer = function(message) {
+    this.playTurn = function(message) {
         var data = dataService.getUserGame(message.user);
 
         /* Not playing yet */
@@ -55,6 +61,7 @@ module.exports = function(drawingService, wordService, dataService) {
 
         /* Update the word and the game with the new letter */
         data.playedLetters.push(letter);
+
         if (data.wordToFind.includes(letter)) {
             data.wordToShow = getWordToShow(data.wordToFind, data.playedLetters);
             if (data.wordToShow.includes("*")) {
@@ -63,7 +70,8 @@ module.exports = function(drawingService, wordService, dataService) {
                 res += "YOU WIN\n";
                 res += data.wordToFind;
                 res += "Type `start` to play again"
-                data.isPlaying = false;
+
+                dataService.endUserGame(message.user, true);
             }
         } else {
             data.failedAttemps += 1;
@@ -73,18 +81,43 @@ module.exports = function(drawingService, wordService, dataService) {
             res += "\n```";
             res += drawing;
             res += "```\n\n";
-
             res += data.wordToShow;
+
+            if (data.failedAttemps == 7) {
+                res += "\nYOU LOSE\n";
+                res += data.wordToFind;
+                res += "\n";
+                res += "Type `start` to play again"
+
+                dataService.endUserGame(message.user, false);
+            }
         }
 
-        if (data.failedAttemps == 7) {
-            data.isPlaying = false;
-            res += "\nYOU LOSE\n";
-            res += data.wordToFind;
+        return res;
+    }
+
+    this.leaderboard = function(user) {
+        var data = dataService.getAllUserScores();
+
+        var res = "*Leaderboard!*\n";
+        //res += "========================\n";
+        res += "``̀`\n";
+        res += "Played    Won    Ratio\n"
+
+        data.forEach(function(user) {
+            res += user.played;
+            res += "        ";
+            res += user.won;
+            res += "        ";
+            res += user.played/user.won;
+            if (user.isCurrentUser) {
+                res += "        ";
+                res += "YOU";
+            }
             res += "\n";
-            res += "Type `start` to play again"
-        }
+        });
 
+        res += "\n``̀`\n";
         return res;
     }
 };

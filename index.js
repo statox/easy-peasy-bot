@@ -1,9 +1,9 @@
-/**
+/*
  * A Bot to play games on slack!
  */
 
 
-/**
+/*
  * Define a function for initiating a conversation on installation
  * With custom integrations, we don't have a way to find out who installed us, so we can't message them :(
  */
@@ -22,7 +22,7 @@ function onInstallation(bot, installer) {
 }
 
 
-/**
+/*
  * Configure the persistence options
  */
 var config = {};
@@ -37,7 +37,7 @@ if (process.env.MONGOLAB_URI) {
     };
 }
 
-/**
+/*
  * Are being run as an app or a custom integration? The initialization will differ, depending
  */
 
@@ -67,7 +67,7 @@ var dataService = new DataService(controller);
 var GameService = require('./gameService.js');
 var gameService = new GameService(drawingService, wordService, dataService);
 
-/**
+/*
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not
  * been disconnected from the websocket. In the future, it would be super awesome to be able to specify
  * a reconnect policy, and do reconnections automatically. In the meantime, we aren't going to attempt reconnects,
@@ -86,8 +86,8 @@ controller.on('rtm_close', function (bot) {
 });
 
 
-/**
- * Core bot logic goes here!
+/*
+ * Specific events
  */
 controller.on('bot_channel_join', function (bot, message) {
     bot.reply(message, "I'm here let's play hangman!")
@@ -102,10 +102,15 @@ controller.hears('start', 'direct_message', function (bot, message) {
     bot.reply(message, res);
 });
 
-/**
- * Any un-handled direct mention gets a reaction
+controller.hears('leaderboard', 'direct_message', function(bot, message) {
+    var res = gameService.leaderboard(message.user);
+    bot.reply(message, res);
+});
+
+/*
+ * Any un-handled direct mention should be a game turn
  */
 controller.on('direct_message', function (bot, message) {
-    var res = gameService.handleAnswer(message);
+    var res = gameService.playTurn(message);
     bot.reply(message, res);
 });
