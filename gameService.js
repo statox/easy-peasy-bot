@@ -1,8 +1,5 @@
-var DrawingService = require('./drawingService');
-var drawingService = new DrawingService();
-
-module.exports = function() {
-    var wordList = [ 'arbre', 'bateau', 'couteau' ];
+module.exports = function(drawingService, wordService) {
+    var drawingService = drawingService;
     var wordToFind;
     var wordToShow;
     var playedLetters = [];
@@ -10,8 +7,7 @@ module.exports = function() {
     var failedAttemps = 0;
 
     var getRandomWord = function() {
-        var index = Math.floor(Math.random() * wordList.length);
-        return wordList[index].toUpperCase();
+        return wordService.getRandomWord();
     }
 
     var updateWordToShow = function() {
@@ -65,6 +61,7 @@ module.exports = function() {
             } else {
                 res += "YOU WIN\n";
                 res += wordToFind;
+                res += "Type `start` to play again"
                 isPlaying = false;
             }
         } else {
@@ -82,6 +79,8 @@ module.exports = function() {
         if (failedAttemps == 7) {
             isPlaying = false;
             res += "\nYOU LOSE\n";
+            res += wordToFind;
+            res += "\n";
             res += "Type `start` to play again"
         }
 

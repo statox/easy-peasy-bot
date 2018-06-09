@@ -1,5 +1,5 @@
 /**
- * A Bot for Slack!
+ * A Bot to play games on slack!
  */
 
 
@@ -25,7 +25,6 @@ function onInstallation(bot, installer) {
 /**
  * Configure the persistence options
  */
-
 var config = {};
 if (process.env.MONGOLAB_URI) {
     var BotkitStorage = require('botkit-storage-mongo');
@@ -56,9 +55,14 @@ if (process.env.TOKEN || process.env.SLACK_TOKEN) {
     process.exit(1);
 }
 
-var GameService = require('./gameService.js');
-var gameService = new GameService();
+var DrawingService = require('./drawingService');
+var drawingService = new DrawingService();
 
+var WordService = require('./wordService.js');
+var wordService = new WordService();
+
+var GameService = require('./gameService.js');
+var gameService = new GameService(drawingService, wordService);
 
 /**
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not
