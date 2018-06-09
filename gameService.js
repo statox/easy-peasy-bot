@@ -46,7 +46,11 @@ module.exports = function(drawingService, wordService, dataService) {
 
         /* Not playing yet */
         if (!data || !data.isPlaying) {
-            return "You are not playing yet, use `start` to begin."
+            var res = "You are not playing yet.\n"
+            res += "Type `start` to play again\n"
+            res += "Type `leaderboard` to show the scores";
+
+            return res;
         }
 
         var letter = message.text.toUpperCase().trim()[0];
@@ -67,9 +71,10 @@ module.exports = function(drawingService, wordService, dataService) {
             if (data.wordToShow.includes("*")) {
                 res += data.wordToShow;
             } else {
-                res += "YOU WIN\n";
-                res += data.wordToFind;
-                res += "Type `start` to play again"
+                res += "*YOU WIN*\n";
+                res += "You had to find " + data.wordToFind + "\n";
+                res += "Type `start` to play again\n"
+                res += "Type `leaderboard` to show the scores";
 
                 dataService.endUserGame(message.user, true);
             }
@@ -84,10 +89,10 @@ module.exports = function(drawingService, wordService, dataService) {
             res += data.wordToShow;
 
             if (data.failedAttemps == 7) {
-                res += "\nYOU LOSE\n";
-                res += data.wordToFind;
-                res += "\n";
-                res += "Type `start` to play again"
+                res += "\n*YOU LOSE*\n";
+                res += "You had to find " + data.wordToFind + "\n";
+                res += "Type `start` to play again\n"
+                res += "Type `leaderboard` to show the scores";
 
                 dataService.endUserGame(message.user, false);
             }
@@ -97,27 +102,34 @@ module.exports = function(drawingService, wordService, dataService) {
     }
 
     this.leaderboard = function(user) {
-        var data = dataService.getAllUserScores();
+        var data = dataService.getAllUserScores(user);
 
         var res = "*Leaderboard!*\n";
-        //res += "========================\n";
-        res += "``̀`\n";
-        res += "Played    Won    Ratio\n"
 
-        data.forEach(function(user) {
-            res += user.played;
-            res += "        ";
-            res += user.won;
-            res += "        ";
-            res += user.played/user.won;
-            if (user.isCurrentUser) {
-                res += "        ";
-                res += "YOU";
-            }
-            res += "\n";
-        });
+        if (data.length > 0) {
+            res += "========================\n";
+            res += "Played    Won    Ratio\n"
 
-        res += "\n``̀`\n";
+            data.forEach(function(user) {
+                if (user.isCurrentUser) {
+                    res += "*";
+                }
+                res += user.played;
+                res += "                ";
+                res += user.won;
+                res += "                ";
+                res += Math.floor((100 * user.won) / user.played);
+                if (user.isCurrentUser) {
+                    res += "                ";
+                    res += "YOU*";
+                }
+                res += "\n";
+            });
+
+            res += "========================";
+        } else {
+            res += "No one played yet. Be the first!";
+        }
         return res;
     }
 };

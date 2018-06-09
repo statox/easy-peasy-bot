@@ -29,8 +29,6 @@ module.exports = function(controller) {
             data[user].isPlaying = true,
             data[user].gamesPlayed += 1;
         }
-
-        showData(user);
     };
 
     this.endUserGame = function(user, won) {
