@@ -1,7 +1,9 @@
 module.exports = function() {
     this.getRandomWord = function() {
-        var index = Math.floor(Math.random() * wordList.length);
-        return wordList[index].toUpperCase();
+        return new Promise(function(resolve, reject) {
+            var index = Math.floor(Math.random() * wordList.length);
+            resolve(wordList[index].toUpperCase());
+        });
     };
 
     var wordList = [

@@ -6,10 +6,6 @@ module.exports = function(drawingService, wordService, dataService, scoreService
     var isPlaying = false;
     var failedAttemps = 0;
 
-    var getRandomWord = function() {
-        return wordService.getRandomWord();
-    }
-
     var getWordToShow = function(wordToFind, playedLetters) {
         var wordToShow = ""
         for (var i = 0; i < wordToFind.length; i++) {
@@ -47,18 +43,21 @@ module.exports = function(drawingService, wordService, dataService, scoreService
 
             var userData = dataService.getUserGame(user);
             if (!userData || !userData.isPlaying) {
-                var wordToFind = getRandomWord();
-                var wordToShow = getWordToShow(wordToFind, []);
-                dataService.initializeUserGame(user, wordToFind, wordToShow);
+                wordService.getRandomWord().then(function(randomWord) {
+                    var wordToFind = randomWord;
+                    var wordToShow = getWordToShow(wordToFind, []);
+                    dataService.initializeUserGame(user, wordToFind, wordToShow);
 
-                res += "Let's begin to play!\n";
-                res += wordToShow;
+                    res += "Let's begin to play!\n";
+                    res += wordToShow;
+
+                    resolve(res);
+                });
             } else {
                 res += "You are already playing!\n";
                 res += userData.wordToShow;
+                resolve(res);
             }
-
-            resolve(res);
         });
     }
 
