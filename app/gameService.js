@@ -1,3 +1,5 @@
+var latinize = require('latinize');
+
 module.exports = function(drawingService, wordService, dataService, scoreService) {
     var drawingService = drawingService;
     var wordToFind;
@@ -8,8 +10,10 @@ module.exports = function(drawingService, wordService, dataService, scoreService
 
     var getWordToShow = function(wordToFind, playedLetters) {
         var wordToShow = ""
+
         for (var i = 0; i < wordToFind.length; i++) {
-            if (playedLetters.includes(wordToFind[i].toUpperCase())) {
+            var latinizedLetter = latinize(wordToFind[i].toUpperCase());
+            if (playedLetters.includes(latinizedLetter)) {
                 wordToShow += wordToFind[i] + " ";
             } else {
                 wordToShow += "* ";
