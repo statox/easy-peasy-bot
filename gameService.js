@@ -22,6 +22,25 @@ module.exports = function(drawingService, wordService, dataService, scoreService
         return wordToShow;
     }
 
+    var endUserGame = function(user, won) {
+        var data = dataService.getUserGame(user);
+
+        delete data.wordToShow;
+        delete data.wordToFind;
+        delete data.failedAttemps;
+        delete data.playedLetters;
+
+        if (won) {
+            data.gamesWon += 1;
+        }
+
+        data.gamesPlayed += 1;
+        data.ratio = Math.floor((100 * data.gamesWon) / data.gamesPlayed);
+        data.isPlaying = false;
+
+        dataService.endUserGame(user);
+    };
+
     this.startGame = function(user) {
         var res = "";
 
@@ -76,7 +95,7 @@ module.exports = function(drawingService, wordService, dataService, scoreService
                 res += "Type `start` to play again\n"
                 res += "Type `leaderboard` to show the scores";
 
-                dataService.endUserGame(message.user, true);
+                endUserGame(message.user, true);
             }
         } else {
             data.failedAttemps += 1;
@@ -94,7 +113,7 @@ module.exports = function(drawingService, wordService, dataService, scoreService
                 res += "Type `start` to play again\n"
                 res += "Type `leaderboard` to show the scores";
 
-                dataService.endUserGame(message.user, false);
+                endUserGame(message.user, false);
             }
         }
 
