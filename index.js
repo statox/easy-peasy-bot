@@ -106,8 +106,9 @@ controller.hears('help', 'direct_message', function (bot, message) {
 });
 
 controller.hears('start', 'direct_message', function (bot, message) {
-    var res = gameService.startGame(message.user);
-    bot.reply(message, res);
+    gameService.startGame(message.user).then(function(res) {
+        bot.reply(message, res);
+    });
 });
 
 controller.hears('leaderboard', 'direct_message', function(bot, message) {

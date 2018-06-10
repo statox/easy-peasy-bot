@@ -42,22 +42,24 @@ module.exports = function(drawingService, wordService, dataService, scoreService
     };
 
     this.startGame = function(user) {
-        var res = "";
+        return new Promise(function(resolve, reject) {
+            var res = "";
 
-        var userData = dataService.getUserGame(user);
-        if (!userData || !userData.isPlaying) {
-            var wordToFind = getRandomWord();
-            var wordToShow = getWordToShow(wordToFind, []);
-            dataService.initializeUserGame(user, wordToFind, wordToShow);
+            var userData = dataService.getUserGame(user);
+            if (!userData || !userData.isPlaying) {
+                var wordToFind = getRandomWord();
+                var wordToShow = getWordToShow(wordToFind, []);
+                dataService.initializeUserGame(user, wordToFind, wordToShow);
 
-            res += "Let's begin to play!\n";
-            res += wordToShow;
-        } else {
-            res += "You are already playing!\n";
-            res += userData.wordToShow;
-        }
+                res += "Let's begin to play!\n";
+                res += wordToShow;
+            } else {
+                res += "You are already playing!\n";
+                res += userData.wordToShow;
+            }
 
-        return res;
+            resolve(res);
+        });
     }
 
     this.playTurn = function(message) {
