@@ -1,8 +1,44 @@
+var request = require('request');
+var htmlparser = require("htmlparser");
+
 module.exports = function() {
+    /*
+     * Try to get a random word from palabrasaleatorias.com
+     * if a word can't be retrieved return a random word from
+     * the local list
+     */
     this.getRandomWord = function() {
         return new Promise(function(resolve, reject) {
             var index = Math.floor(Math.random() * wordList.length);
-            resolve(wordList[index].toUpperCase());
+            var localRandomWord = wordList[index].toUpperCase();
+
+            request('https://www.palabrasaleatorias.com/mots-aleatoires.php', function (error, response, body) {
+                var handler = new htmlparser.DefaultHandler(function (error, dom) {
+                    var remoteWord = "";
+                    if (!error) {
+                        /*
+                         * Manual parsing, bitch!
+                         * TODO: make it cleaner
+                         */
+                        remoteWord = dom.find(html => { return html.name === "html";}).children
+                            .find(html => { return html.name === "body";}).children
+                            .find(html => { return html.name === "center";}).children
+                            .find(html => { return html.name === "center";}).children
+                            .find(html => { return html.name === "table";}).children
+                            .find(html => { return html.name === "tr";}).children
+                            .find(html => { return html.name === "td";}).children
+                            .find(html => { return html.name === "div";}).children[0].data.trim().toUpperCase();
+                    }
+
+                    if (remoteWord) {
+                        resolve(remoteWord);
+                    } else {
+                        resolve(localRandomWord);
+                    };
+                });
+                var parser = new htmlparser.Parser(handler);
+                parser.parseComplete(body);
+            });
         });
     };
 

@@ -29,6 +29,7 @@
   "dependencies": {
     "botkit": "0.2.2",
     "botkit-storage-mongo": "^1.0.2",
+    "htmlparser": "^1.7.7",
     "mongodb": "^1.4.39"
   }
 }
