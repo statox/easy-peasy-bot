@@ -1,7 +1,7 @@
 {
-  "name": "easy-peasy-bot",
+  "name": "hangman-slackbot",
   "version": "1.0.0",
-  "description": "The awesomest bot evar.",
+  "description": "Play hangman on slack",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -9,18 +9,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DEGoodmanWilson/easy-peasy-bot-app.git"
+    "url": "git+https://github.com/statox/hangman-for-slack.git"
   },
   "keywords": [
     "slack",
-    "bot"
+    "bot",
+    "game",
+    "hangman"
   ],
-  "author": "D.E. Goodman-Wilson",
+  "author": "statox",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DEGoodmanWilson/easy-peasy-bot-app/issues"
+    "url": "https://github.com/statox/hangman-for-slack/issues"
   },
-  "homepage": "https://github.com/DEGoodmanWilson/easy-peasy-bot-app#readme",
+  "homepage": "https://github.com/statox/hangman-for-slack#readme",
   "engines": {
     "node": "5.1.1"
   },
