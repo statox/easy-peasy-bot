@@ -30,11 +30,11 @@ module.exports = function() {
                             .find(html => { return html.name === "div";}).children[0].data.trim().toUpperCase();
                     }
 
+                    var wordToReturn = localRandomWord;
                     if (remoteWord) {
-                        resolve(remoteWord);
-                    } else {
-                        resolve(localRandomWord);
-                    };
+                        wordToReturn = remoteWord;
+                    }
+                    resolve(wordToReturn);
                 });
                 var parser = new htmlparser.Parser(handler);
                 parser.parseComplete(body);

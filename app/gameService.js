@@ -77,6 +77,41 @@ module.exports = function(drawingService, wordService, dataService, scoreService
             return res;
         }
 
+        message.text = latinize(message.text);
+        /* If the player sent more than one letter check if they were right */
+        var completeMessage = message.text.toUpperCase().trim();
+        if (completeMessage.length > 1) {
+            var res = "";
+            if ( completeMessage === data.wordToFind) {
+                res += "*YOU WIN*\n";
+                res += "You had to find " + data.wordToFind + "\n";
+                res += "Type `start` to play again\n"
+                res += "Type `leaderboard` to show the scores";
+
+                endUserGame(message.user, true);
+            } else {
+                data.failedAttemps += 1;
+                res += "WRONG\n";
+                res += "errors: " + data.failedAttemps + "\n";
+                var drawing = drawingService.getDrawing(data.failedAttemps);
+                res += "\n```";
+                res += drawing;
+                res += "```\n\n";
+                res += data.wordToShow;
+
+                if (data.failedAttemps == 7) {
+                    res += "\n*YOU LOSE*\n";
+                    res += "You had to find " + data.wordToFind + "\n";
+                    res += "Type `start` to play again\n"
+                    res += "Type `leaderboard` to show the scores";
+
+                    endUserGame(message.user, false);
+                }
+            }
+            return res;
+        }
+
+        /* Otherwise test the letter and update the game */
         var letter = message.text.toUpperCase().trim()[0];
         var res = "";
 
