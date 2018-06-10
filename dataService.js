@@ -46,12 +46,18 @@ module.exports = function(controller) {
     };
 
     this.getAllUserScores = function(user) {
-        return Object.keys(data).map(function(key) {
-            return {
-                won: data[key].gamesWon,
-                played: data[key].gamesPlayed,
-                isCurrentUser: key === user
-            }
+        return new Promise(function(resolve, reject) {
+            controller.storage.users.all(function(err, allUserData) {
+                var result = allUserData.map((userData) => {
+                    return {
+                        won: userData.gamesWon,
+                        played: userData.gamesPlayed,
+                        isCurrentUser: userData.id === user
+                    };
+                });
+
+                resolve(result);
+            });
         });
     };
 };

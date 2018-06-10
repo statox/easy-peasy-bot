@@ -121,10 +121,13 @@ module.exports = function(drawingService, wordService, dataService, scoreService
     }
 
     this.leaderboard = function(user) {
-        var leaderBoard = scoreService.getGlobalLeaderboardWithUser(user);
-        var res = "*Leaderboard!*\n";
-        res += leaderBoard;
+        return new Promise(function(resolve, reject) {
+            scoreService.getGlobalLeaderboardWithUser(user).then(function(leaderboard) {
+                var res = "*Leaderboard!*\n";
+                res += leaderboard;
 
-        return res;
+                resolve(res);
+            });
+        });
     }
 };
