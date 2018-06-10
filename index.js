@@ -55,19 +55,19 @@ if (process.env.TOKEN || process.env.SLACK_TOKEN) {
     process.exit(1);
 }
 
-var DrawingService = require('./drawingService');
+var DrawingService = require('./app/drawingService');
 var drawingService = new DrawingService();
 
-var WordService = require('./wordService.js');
+var WordService = require('./app/wordService.js');
 var wordService = new WordService();
 
-var DataService = require('./dataService.js');
+var DataService = require('./app/dataService.js');
 var dataService = new DataService(controller);
 
-var ScoreService = require('./scoreService.js');
+var ScoreService = require('./app/scoreService.js');
 var scoreService = new ScoreService(dataService);
 
-var GameService = require('./gameService.js');
+var GameService = require('./app/gameService.js');
 var gameService = new GameService(drawingService, wordService, dataService, scoreService);
 
 /*
