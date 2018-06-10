@@ -1,6 +1,6 @@
 var latinize = require('latinize');
 
-module.exports = function(drawingService, wordService, dataService, scoreService) {
+module.exports = function(drawingService, wordService, dataService, scoreService, responseService) {
     var wordToFind;
     var wordToShow;
     var playedLetters = [];
@@ -42,8 +42,6 @@ module.exports = function(drawingService, wordService, dataService, scoreService
 
     this.startGame = function(user) {
         return new Promise(function(resolve, reject) {
-            var res = "";
-
             var userData = dataService.getUserGame(user);
             if (!userData || !userData.isPlaying) {
                 wordService.getRandomWord().then(function(randomWord) {
@@ -51,15 +49,10 @@ module.exports = function(drawingService, wordService, dataService, scoreService
                     var wordToShow = getWordToShow(wordToFind, []);
                     dataService.initializeUserGame(user, wordToFind, wordToShow);
 
-                    res += "Let's begin to play!\n";
-                    res += wordToShow;
-
-                    resolve(res);
+                    resolve(responseService.startGame(wordToShow));
                 });
             } else {
-                res += "You are already playing!\n";
-                res += userData.wordToShow;
-                resolve(res);
+                resolve(responseService.alreadyPlaying(userData.wordToShow));
             }
         });
     }
@@ -69,11 +62,7 @@ module.exports = function(drawingService, wordService, dataService, scoreService
 
         /* Not playing yet */
         if (!data || !data.isPlaying) {
-            var res = "You are not playing yet.\n"
-            res += "Type `start` to play again\n"
-            res += "Type `leaderboard` to show the scores";
-
-            return res;
+            return responseService.notPlayingYet();
         }
 
         message.text = latinize(message.text);
@@ -82,28 +71,15 @@ module.exports = function(drawingService, wordService, dataService, scoreService
         if (completeMessage.length > 1) {
             var res = "";
             if ( completeMessage === data.wordToFind) {
-                res += "*YOU WIN*\n";
-                res += "You had to find " + data.wordToFind + "\n";
-                res += "Type `start` to play again\n"
-                res += "Type `leaderboard` to show the scores";
-
+                res += responseService.winHangman(data.wordToFind);
                 endUserGame(message.user, true);
             } else {
                 data.failedAttemps += 1;
-                res += "WRONG\n";
-                res += "errors: " + data.failedAttemps + "\n";
                 var drawing = drawingService.getDrawing(data.failedAttemps);
-                res += "\n```";
-                res += drawing;
-                res += "```\n\n";
-                res += data.wordToShow;
+                res += responseService.wrongLetter(data.failedAttemps, drawing, data.wordToShow);
 
                 if (data.failedAttemps == 7) {
-                    res += "\n*YOU LOSE*\n";
-                    res += "You had to find " + data.wordToFind + "\n";
-                    res += "Type `start` to play again\n"
-                    res += "Type `leaderboard` to show the scores";
-
+                    res += responseService.loseHangman(data.wordToFind);
                     endUserGame(message.user, false);
                 }
             }
@@ -116,9 +92,7 @@ module.exports = function(drawingService, wordService, dataService, scoreService
 
         /* Letter already played */
         if (data.playedLetters.includes(letter)) {
-            res += "You already played this letter: " + letter + "\n";
-            res += data.wordToShow;
-            return res;
+            return responseService.letterAlreadyPlayed(letter, data.wordToShow);
         }
 
         /* Update the word and the game with the new letter */
@@ -129,29 +103,16 @@ module.exports = function(drawingService, wordService, dataService, scoreService
             if (data.wordToShow.includes("*")) {
                 res += data.wordToShow;
             } else {
-                res += "*YOU WIN*\n";
-                res += "You had to find " + data.wordToFind + "\n";
-                res += "Type `start` to play again\n"
-                res += "Type `leaderboard` to show the scores";
-
+                res += responseService.winHangman(data.wordToFind);
                 endUserGame(message.user, true);
             }
         } else {
             data.failedAttemps += 1;
-            res += "WRONG\n";
-            res += "errors: " + data.failedAttemps + "\n";
             var drawing = drawingService.getDrawing(data.failedAttemps);
-            res += "\n```";
-            res += drawing;
-            res += "```\n\n";
-            res += data.wordToShow;
+            res += responseService.wrongLetter(data.failedAttemps, drawing, data.wordToShow);
 
             if (data.failedAttemps == 7) {
-                res += "\n*YOU LOSE*\n";
-                res += "You had to find " + data.wordToFind + "\n";
-                res += "Type `start` to play again\n"
-                res += "Type `leaderboard` to show the scores";
-
+                res += responseService.loseHangman(data.wordToFind);
                 endUserGame(message.user, false);
             }
         }
@@ -162,36 +123,19 @@ module.exports = function(drawingService, wordService, dataService, scoreService
     this.leaderboard = function(user) {
         return new Promise(function(resolve, reject) {
             scoreService.getGlobalLeaderboardWithUser(user).then(function(leaderboard) {
-                var res = "*Leaderboard!*\n";
-                res += leaderboard;
-
-                resolve(res);
+                resolve(responseService.leaderboard(leaderboard));
             });
         });
     };
 
     this.getHelp = function(user) {
-        var res = "";
         if (user) {
             var data = dataService.getUserGame(user);
             if (data && data.isPlaying) {
-                res += "You are currently playing hangman!\n"
-                res += "Type any letter to continue playing\n";
-                res += data.wordToShow;
-                return res;
+                return responseService.helpInGame(data.wordToShow);
             }
         }
-        res += "Type `start` to begin to play\n";
-        res += "Type `leaderboard` to show the scores";
 
-        return res;
-    };
-
-    this.sayHello = function() {
-        var res = "";
-        res += "Hello!\n";
-        res += "Beep. Boop. I am a bot and I can play hangman with you!\n";
-
-        return res;
+        return responseService.helpOutOfGame();
     };
 };

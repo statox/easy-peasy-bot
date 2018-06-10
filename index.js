@@ -67,8 +67,11 @@ var dataService = new DataService(controller);
 var ScoreService = require('./app/scoreService.js');
 var scoreService = new ScoreService(dataService);
 
+var ResponseService = require('./app/responseService.js');
+var responseService = new ResponseService();
+
 var GameService = require('./app/gameService.js');
-var gameService = new GameService(drawingService, wordService, dataService, scoreService);
+var gameService = new GameService(drawingService, wordService, dataService, scoreService, responseService);
 
 /*
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not
@@ -97,7 +100,7 @@ controller.on('bot_channel_join', function (bot, message) {
 });
 
 controller.hears('hello', 'direct_message', function (bot, message) {
-    bot.reply(message, gameService.sayHello());
+    bot.reply(message, responseService.hello());
     bot.reply(message, gameService.getHelp());
 });
 
@@ -106,7 +109,7 @@ controller.hears('help', 'direct_message', function (bot, message) {
 });
 
 controller.hears('start', 'direct_message', function (bot, message) {
-    bot.reply(message, "I'm looking for a word to play with");
+    bot.reply(message, responseService.lookingForWord());
     gameService.startGame(message.user).then(function(res) {
         bot.reply(message, res);
     });
