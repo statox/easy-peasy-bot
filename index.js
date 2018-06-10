@@ -106,6 +106,7 @@ controller.hears('help', 'direct_message', function (bot, message) {
 });
 
 controller.hears('start', 'direct_message', function (bot, message) {
+    bot.reply(message, "I'm looking for a word to play with");
     gameService.startGame(message.user).then(function(res) {
         bot.reply(message, res);
     });
