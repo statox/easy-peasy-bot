@@ -1,7 +1,6 @@
 var latinize = require('latinize');
 
 module.exports = function(drawingService, wordService, dataService, scoreService) {
-    var drawingService = drawingService;
     var wordToFind;
     var wordToShow;
     var playedLetters = [];
