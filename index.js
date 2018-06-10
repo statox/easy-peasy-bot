@@ -64,8 +64,11 @@ var wordService = new WordService();
 var DataService = require('./dataService.js');
 var dataService = new DataService(controller);
 
+var ScoreService = require('./scoreService.js');
+var scoreService = new ScoreService(dataService);
+
 var GameService = require('./gameService.js');
-var gameService = new GameService(drawingService, wordService, dataService);
+var gameService = new GameService(drawingService, wordService, dataService, scoreService);
 
 /*
  * A demonstration for how to handle websocket events. In this case, just log when we have and have not

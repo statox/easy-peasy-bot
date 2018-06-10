@@ -1,4 +1,4 @@
-module.exports = function(drawingService, wordService, dataService) {
+module.exports = function(drawingService, wordService, dataService, scoreService) {
     var drawingService = drawingService;
     var wordToFind;
     var wordToShow;
@@ -102,34 +102,10 @@ module.exports = function(drawingService, wordService, dataService) {
     }
 
     this.leaderboard = function(user) {
-        var data = dataService.getAllUserScores(user);
-
+        var leaderBoard = scoreService.getGlobalLeaderboardWithUser(user);
         var res = "*Leaderboard!*\n";
+        res += leaderBoard;
 
-        if (data.length > 0) {
-            res += "========================\n";
-            res += "Played    Won    Ratio\n"
-
-            data.forEach(function(user) {
-                if (user.isCurrentUser) {
-                    res += "*";
-                }
-                res += user.played;
-                res += "                ";
-                res += user.won;
-                res += "                ";
-                res += Math.floor((100 * user.won) / user.played);
-                if (user.isCurrentUser) {
-                    res += "                ";
-                    res += "YOU*";
-                }
-                res += "\n";
-            });
-
-            res += "========================";
-        } else {
-            res += "No one played yet. Be the first!";
-        }
         return res;
     }
 };
