@@ -97,7 +97,12 @@ controller.on('bot_channel_join', function (bot, message) {
 });
 
 controller.hears('hello', 'direct_message', function (bot, message) {
-    bot.reply(message, 'Hello!');
+    bot.reply(message, gameService.sayHello());
+    bot.reply(message, gameService.getHelp());
+});
+
+controller.hears('help', 'direct_message', function (bot, message) {
+    bot.reply(message, gameService.getHelp(message.user));
 });
 
 controller.hears('start', 'direct_message', function (bot, message) {

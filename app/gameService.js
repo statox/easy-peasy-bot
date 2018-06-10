@@ -129,5 +129,30 @@ module.exports = function(drawingService, wordService, dataService, scoreService
                 resolve(res);
             });
         });
-    }
+    };
+
+    this.getHelp = function(user) {
+        var res = "";
+        if (user) {
+            var data = dataService.getUserGame(user);
+            if (data && data.isPlaying) {
+                res += "You are currently playing hangman!\n"
+                res += "Type any letter to continue playing\n";
+                res += data.wordToShow;
+                return res;
+            }
+        }
+        res += "Type `start` to begin to play\n";
+        res += "Type `leaderboard` to show the scores";
+
+        return res;
+    };
+
+    this.sayHello = function() {
+        var res = "";
+        res += "Hello!\n";
+        res += "Beep. Boop. I am a bot and I can play hangman with you!\n";
+
+        return res;
+    };
 };
